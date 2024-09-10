@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using NewLife.Log;
-
 using Pek.Infrastructure;
 using Pek.VirtualFileSystem;
 
@@ -21,7 +19,7 @@ public partial class DHStartup : IDHStartup
     /// <param name="application">用于配置应用程序的请求管道的生成器</param>
     public void Configure(IApplicationBuilder application)
     {
-        application.UseVirtualFiles();
+        //application.UseVirtualFiles();
     }
 
     /// <summary>
