@@ -21,7 +21,6 @@ public partial class DHStartup : IDHStartup
     /// <param name="application">用于配置应用程序的请求管道的生成器</param>
     public void Configure(IApplicationBuilder application)
     {
-        XTrace.WriteLine($"进来了吗？VirtualFileSystem：Configure");
         application.UseVirtualFiles();
     }
 
@@ -33,8 +32,6 @@ public partial class DHStartup : IDHStartup
     /// <param name="webHostEnvironment"></param>
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
     {
-        XTrace.WriteLine($"进来了吗？VirtualFileSystem：ConfigureServices");
-
         // 注册虚拟文件系统
         services.AddVFS();
 
