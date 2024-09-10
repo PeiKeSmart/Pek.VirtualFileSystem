@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Readme.MD = Readme.MD
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DH.VirtualFileSystem", "DH.VirtualFileSystem\DH.VirtualFileSystem.csproj", "{2B4793CE-80F1-4D8C-8287-ECE1E031CE41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pek.VirtualFileSystem", "Pek.VirtualFileSystem\Pek.VirtualFileSystem.csproj", "{2B4793CE-80F1-4D8C-8287-ECE1E031CE41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
