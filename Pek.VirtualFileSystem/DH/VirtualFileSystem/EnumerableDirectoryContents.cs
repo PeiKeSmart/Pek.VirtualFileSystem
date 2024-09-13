@@ -2,7 +2,7 @@
 
 using Microsoft.Extensions.FileProviders;
 
-namespace DH.VirtualFileSystem;
+namespace Pek.VirtualFileSystem;
 
 internal class EnumerableDirectoryContents : IDirectoryContents
 {

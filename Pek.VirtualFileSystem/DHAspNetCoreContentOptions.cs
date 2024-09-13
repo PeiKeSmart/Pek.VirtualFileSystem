@@ -1,4 +1,4 @@
-﻿namespace DH.VirtualFileSystem;
+﻿namespace Pek.VirtualFileSystem;
 
 public class DHAspNetCoreContentOptions
 {

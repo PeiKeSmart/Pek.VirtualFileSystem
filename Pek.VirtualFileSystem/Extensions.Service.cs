@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace DH.VirtualFileSystem;
+namespace Pek.VirtualFileSystem;
 
 /// <summary>
 /// 扩展服务

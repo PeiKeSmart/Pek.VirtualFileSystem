@@ -5,9 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Pek.Infrastructure;
-using Pek.VirtualFileSystem;
 
-namespace DH.VirtualFileSystem;
+namespace Pek.VirtualFileSystem;
 
 public partial class DHStartup : IDHStartup
 {

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.FileProviders;
 
-namespace DH.VirtualFileSystem
-{
-    public interface IVirtualFileProvider : IFileProvider
-    {
+namespace Pek.VirtualFileSystem;
 
-    }
+public interface IVirtualFileProvider : IFileProvider
+{
+
 }

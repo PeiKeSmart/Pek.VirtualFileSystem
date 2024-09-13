@@ -5,7 +5,7 @@ using Microsoft.Extensions.Primitives;
 
 using NewLife;
 
-namespace DH.VirtualFileSystem;
+namespace Pek.VirtualFileSystem;
 
 public class WebContentFileProvider : IWebContentFileProvider
 {

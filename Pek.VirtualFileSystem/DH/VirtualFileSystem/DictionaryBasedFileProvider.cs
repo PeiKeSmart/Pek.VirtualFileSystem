@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 
-namespace DH.VirtualFileSystem;
+namespace Pek.VirtualFileSystem;
 
 public abstract class DictionaryBasedFileProvider : IFileProvider
 {

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 
-namespace DH.VirtualFileSystem;
+namespace Pek.VirtualFileSystem;
 
 public class RazorViewEngineVirtualFileProvider : IFileProvider
 {

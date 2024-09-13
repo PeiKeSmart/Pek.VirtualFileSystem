@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.FileProviders;
 
-namespace DH.VirtualFileSystem
-{
-    public interface IDynamicFileProvider : IFileProvider
-    {
-        void AddOrUpdate(IFileInfo fileInfo);
+namespace Pek.VirtualFileSystem;
 
-        bool Delete(string filePath);
-    }
+public interface IDynamicFileProvider : IFileProvider
+{
+    void AddOrUpdate(IFileInfo fileInfo);
+
+    bool Delete(string filePath);
 }

@@ -1,10 +1,8 @@
-﻿using DH.VirtualFileSystem.Embedded;
+﻿using NewLife;
 
-using NewLife;
+using Pek.VirtualFileSystem.Embedded;
 
-using Pek.VirtualFileSystem;
-
-namespace DH.VirtualFileSystem;
+namespace Pek.VirtualFileSystem;
 
 public static class VirtualFileSetListExtensions
 {

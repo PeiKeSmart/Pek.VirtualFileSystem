@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Primitives;
 
-namespace DH.VirtualFileSystem;
+namespace Pek.VirtualFileSystem;
 
 internal static class PathUtils
 {

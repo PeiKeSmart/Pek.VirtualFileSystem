@@ -1,41 +1,40 @@
-﻿namespace DH.VirtualFileSystem
+﻿namespace Pek.VirtualFileSystem;
+
+internal static class VirtualFilePathHelper
 {
-    internal static class VirtualFilePathHelper
+    //TODO: Optimize this class!
+
+    public static string NormalizePath(string fullPath)
     {
-        //TODO: Optimize this class!
+        var fileName = fullPath;
+        var extension = "";
 
-        public static string NormalizePath(string fullPath)
+        if (fileName.Contains("."))
         {
-            var fileName = fullPath;
-            var extension = "";
-
-            if (fileName.Contains("."))
+            extension = fullPath.Substring(fileName.LastIndexOf(".", StringComparison.Ordinal));
+            if (extension.Contains("/"))
             {
-                extension = fullPath.Substring(fileName.LastIndexOf(".", StringComparison.Ordinal));
-                if (extension.Contains("/"))
-                {
-                    //That means the file does not have extension, but a directory has "." char. So, clear extension.
-                    extension = "";
-                }
-                else
-                {
-                    fileName = fullPath.Substring(0, fullPath.Length - extension.Length);
-                }
+                //That means the file does not have extension, but a directory has "." char. So, clear extension.
+                extension = "";
             }
-
-            return NormalizeChars(fileName) + extension;
+            else
+            {
+                fileName = fullPath.Substring(0, fullPath.Length - extension.Length);
+            }
         }
 
-        private static string NormalizeChars(string fileName)
+        return NormalizeChars(fileName) + extension;
+    }
+
+    private static string NormalizeChars(string fileName)
+    {
+        var folderParts = fileName.Replace(".", "/").Split("/");
+
+        if (folderParts.Length == 1)
         {
-            var folderParts = fileName.Replace(".", "/").Split("/");
-
-            if (folderParts.Length == 1)
-            {
-                return folderParts[0];
-            }
-
-            return folderParts.Take(folderParts.Length - 1).Select(s => s.Replace("-", "_")).JoinAsString("/") + "/" + folderParts.Last();
+            return folderParts[0];
         }
+
+        return folderParts.Take(folderParts.Length - 1).Select(s => s.Replace("-", "_")).JoinAsString("/") + "/" + folderParts.Last();
     }
 }
