@@ -1,6 +1,4 @@
-﻿using DH.VirtualFileSystem.Microsoft.AspNetCore.Builder;
-
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
@@ -27,7 +25,7 @@ public partial class DHStartup : IDHStartup
     /// </summary>
     /// <param name="services">服务描述符集合</param>
     /// <param name="configuration">应用程序的配置</param>
-    /// <param name="webHostEnvironment"></param>
+    /// <param name="webHostEnvironment">应用程序的环境</param>
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
     {
         // 注册虚拟文件系统
