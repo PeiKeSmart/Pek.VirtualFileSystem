@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
     <RootNamespace>Pek</RootNamespace>
     <AssemblyTitle>虚拟文件系统</AssemblyTitle>
     <Description>DH框架虚拟文件系统</Description>
@@ -45,7 +45,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Pek.AspNetCore" Version="3.91.2024.1101-beta0120" />
-    <PackageReference Include="Pek.Common" Version="3.91.2024.1101-beta0115" />
+    <PackageReference Include="Pek.Common" Version="3.91.2024.1101-beta0137" />
   </ItemGroup>
 
   <ItemGroup>
