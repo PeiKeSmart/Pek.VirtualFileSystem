@@ -8,7 +8,7 @@ using Pek.Infrastructure;
 
 namespace Pek.VirtualFileSystem;
 
-public partial class DHStartup : IDHStartup
+public partial class DHStartup : IPekStartup
 {
     /// <summary>
     /// 配置添加的中间件的使用
@@ -108,9 +108,17 @@ public partial class DHStartup : IDHStartup
     }
 
     /// <summary>
+    /// 处理数据
+    /// </summary>
+    public void ProcessData()
+    {
+
+    }
+
+    /// <summary>
     /// 获取此启动配置实现的顺序
     /// </summary>
-    public int StartupOrder => 51;
+    public Int32 StartupOrder => 51;
 
     /// <summary>
     /// 获取此启动配置实现的顺序。主要针对ConfigureMiddleware、UseRouting前执行的数据、UseAuthentication或者UseAuthorization后面 Endpoints前执行的数据
