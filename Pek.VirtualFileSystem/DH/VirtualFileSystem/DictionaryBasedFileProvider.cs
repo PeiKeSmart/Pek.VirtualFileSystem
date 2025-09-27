@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
+using NewLife.Log;
 
 namespace Pek.VirtualFileSystem;
 
@@ -14,10 +15,12 @@ public abstract class DictionaryBasedFileProvider : IFileProvider
             return new NotFoundFileInfo(subpath);
         }
 
-        var file = Files.GetOrDefault(NormalizePath(subpath));
+        var normalized = NormalizePath(subpath);
+        var file = Files.GetOrDefault(normalized);
 
         if (file == null)
         {
+            XTrace.WriteLine("[VirtualFileMiss] requested={0} normalized={1}", subpath, normalized);
             return new NotFoundFileInfo(subpath);
         }
 

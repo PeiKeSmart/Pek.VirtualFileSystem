@@ -72,25 +72,7 @@ public class CubeEmbeddedFileProvider : IFileProvider
         if (_assembly.GetManifestResourceInfo(text) != null)
             return new EmbeddedResourceFileInfo(_assembly, text, fileName, _lastModified);
 
-        // 关键操作，带有横杠的目录名，编译为嵌入资源时，变成下划线
-        var p = text.IndexOfAny(new[] { '-', '@' });
-        if (p > 0)
-        {
-            // 在目录部分查找
-            var p2 = subpath.LastIndexOfAny(new[] { '/', '\\' });
-            var p3 = p2 + _baseNamespace.Length;
-            if (p2 > 0 && p < p3)
-            {
-                var text2 = text[..p3].Replace("-", "_").Replace("@", "_");
-                text2 += text[p3..];
-                if (text2 != text)
-                {
-                    if (_assembly.GetManifestResourceInfo(text2) != null)
-                        return new EmbeddedResourceFileInfo(_assembly, text2, fileName, _lastModified);
-                }
-            }
-        }
-
+        // 新规范：不再对 '-' 或 '@' 做下划线替换回退，路径需与资源名精确匹配
         return new NotFoundFileInfo(fileName);
     }
 
