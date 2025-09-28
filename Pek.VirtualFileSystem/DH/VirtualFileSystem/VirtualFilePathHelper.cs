@@ -2,27 +2,39 @@
 
 internal static class VirtualFilePathHelper
 {
-    /// <summary>规范化路径：仅统一分隔符、去重斜杠、补前导斜杠、去除末尾多余斜杠；不再拆分 '.' 或替换 '-'</summary>
+    //TODO: Optimize this class!
+
     public static string NormalizePath(string fullPath)
     {
-        if (string.IsNullOrWhiteSpace(fullPath)) return fullPath;
+        var fileName = fullPath;
+        var extension = "";
 
-        // 统一分隔符
-        var path = fullPath.Replace('\\', '/');
+        if (fileName.Contains("."))
+        {
+            extension = fullPath.Substring(fileName.LastIndexOf(".", StringComparison.Ordinal));
+            if (extension.Contains("/"))
+            {
+                //That means the file does not have extension, but a directory has "." char. So, clear extension.
+                extension = "";
+            }
+            else
+            {
+                fileName = fullPath.Substring(0, fullPath.Length - extension.Length);
+            }
+        }
 
-        // 去掉查询或片段（防御性，正常上游不应传进来）
-        var q = path.IndexOfAny(new[] { '?', '#' });
-        if (q >= 0) path = path.Substring(0, q);
+        return NormalizeChars(fileName) + extension;
+    }
 
-        // 合并重复斜杠
-        while (path.Contains("//")) path = path.Replace("//", "/");
+    private static string NormalizeChars(string fileName)
+    {
+        var folderParts = fileName.Replace(".", "/").Split("/");
 
-        // 补前导斜杠
-        if (!path.StartsWith('/')) path = "/" + path;
+        if (folderParts.Length == 1)
+        {
+            return folderParts[0];
+        }
 
-        // 去掉末尾斜杠（根除外）
-        if (path.Length > 1 && path.EndsWith('/')) path = path.TrimEnd('/');
-
-        return path;
+        return folderParts.Take(folderParts.Length - 1).Select(s => s.Replace("-", "_")).JoinAsString("/") + "/" + folderParts.Last();
     }
 }
