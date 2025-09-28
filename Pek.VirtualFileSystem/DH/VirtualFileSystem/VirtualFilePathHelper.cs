@@ -2,7 +2,7 @@
 
 internal static class VirtualFilePathHelper
 {
-    /// <summary>规范化路径：统一分隔符、去重斜杠、去除末尾多余斜杠；不强制补前导斜杠，保持调用方语义。</summary>
+    /// <summary>规范化路径：仅统一分隔符、去重斜杠、补前导斜杠、去除末尾多余斜杠；不再拆分 '.' 或替换 '-'</summary>
     public static string NormalizePath(string fullPath)
     {
         if (string.IsNullOrWhiteSpace(fullPath)) return fullPath;
@@ -17,7 +17,10 @@ internal static class VirtualFilePathHelper
         // 合并重复斜杠
         while (path.Contains("//")) path = path.Replace("//", "/");
 
-        // 去掉末尾斜杠（保留单独根或空）
+        // 补前导斜杠
+        if (!path.StartsWith('/')) path = "/" + path;
+
+        // 去掉末尾斜杠（根除外）
         if (path.Length > 1 && path.EndsWith('/')) path = path.TrimEnd('/');
 
         return path;
