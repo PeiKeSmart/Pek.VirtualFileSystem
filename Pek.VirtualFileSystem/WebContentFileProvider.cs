@@ -63,6 +63,7 @@ public class WebContentFileProvider : IWebContentFileProvider
         {
             XTrace.WriteLine("[WebVFS] MISS file. Request={0} Tried={1}", subpath, combined);
             TryHeuristicFileDiagnostics(subpath);
+            TryDumpAllVirtualFilesOnce();
         }
         return fallback;
     }
@@ -199,6 +200,66 @@ public class WebContentFileProvider : IWebContentFileProvider
         catch (Exception ex)
         {
             XTrace.WriteLine("[WebVFS][Diag] Heuristic diagnostics error: {0}", ex.Message);
+        }
+    }
+
+    private static bool _dumpedAllVirtualFiles; // 仅一次
+    private void TryDumpAllVirtualFilesOnce()
+    {
+        if (_dumpedAllVirtualFiles) return;
+        if (!Options.DumpAllVirtualFilesOnFirstMiss) return;
+        _dumpedAllVirtualFiles = true;
+        try
+        {
+            // 通过反射深入 _virtualFileProvider -> VirtualFileProvider.InternalVirtualFileProvider -> _files Lazy 字典
+            var vpType = _virtualFileProvider.GetType();
+            // 可能是 VirtualFileProvider 或一个包装，尝试获取 _hybridFileProvider 内部字段
+            // 我们目标是 InternalVirtualFileProvider，其是 CompositeFileProvider 的子层之一
+
+            // 方案：如果是 VirtualFileProvider，先取其私有字段 _hybridFileProvider，然后枚举其 providers
+            var hybridField = vpType.GetField("_hybridFileProvider", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var hybrid = hybridField?.GetValue(_virtualFileProvider);
+            var candidates = new List<IFileProvider>();
+            if (hybrid is CompositeFileProvider composite)
+            {
+                // CompositeFileProvider 有私有字段 _fileProviders
+                var innerField = typeof(CompositeFileProvider).GetField("_fileProviders", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                if (innerField?.GetValue(composite) is IEnumerable<IFileProvider> list)
+                    candidates.AddRange(list);
+            }
+
+            var total = 0;
+            foreach (var provider in candidates)
+            {
+                var pType = provider.GetType();
+                if (!pType.Name.Contains("InternalVirtualFileProvider")) continue;
+                // 找 _files (Lazy<Dictionary<string,IFileInfo>>)
+                var filesField = pType.GetField("_files", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                if (filesField?.GetValue(provider) is Lazy<Dictionary<string, IFileInfo>> lazyDict)
+                {
+                    Dictionary<string, IFileInfo> dict = null;
+                    try { dict = lazyDict.Value; } catch { }
+                    if (dict != null)
+                    {
+                        XTrace.WriteLine("[WebVFS][Dump] Virtual file keys count={0}", dict.Count);
+                        foreach (var kv in dict.OrderBy(e => e.Key, StringComparer.OrdinalIgnoreCase))
+                        {
+                            total++;
+                            var size = kv.Value.Length;
+                            var phys = kv.Value.GetVirtualOrPhysicalPathOrNull();
+                            XTrace.WriteLine("[WebVFS][Dump] Key={0} Size={1} Path={2}", kv.Key, size, phys);
+                        }
+                    }
+                }
+            }
+            if (total == 0)
+            {
+                XTrace.WriteLine("[WebVFS][Dump] 未发现任何 InternalVirtualFileProvider 或其文件字典为空");
+            }
+        }
+        catch (Exception ex)
+        {
+            XTrace.WriteLine("[WebVFS][Dump] 枚举虚拟文件失败: {0}", ex.Message);
         }
     }
 }

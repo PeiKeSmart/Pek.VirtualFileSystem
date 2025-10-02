@@ -8,6 +8,9 @@ public class DHAspNetCoreContentOptions
     public bool LogFileMisses { get; set; } = true;
     /// <summary>记录命中（文件/目录）日志，默认关闭。开启后可与未命中对比。</summary>
     public bool LogFileHits { get; set; } = true;
+    /// <summary>首次文件 MISS 时转储所有虚拟文件键（只执行一次），用于诊断某个特定资源是否已注册。</summary>
+    // 默认开启一次性转储，方便初期排查；使用方可在生产环境关闭以减少日志。
+    public bool DumpAllVirtualFilesOnFirstMiss { get; set; } = true;
 
     public DHAspNetCoreContentOptions()
     {
