@@ -2,6 +2,7 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
+using NewLife.Log;
 
 using NewLife;
 
@@ -13,6 +14,7 @@ public class WebContentFileProvider : IWebContentFileProvider
     private readonly IFileProvider _fileProvider;
     private readonly IWebHostEnvironment _hostingEnvironment;
     private string _rootPath = "/wwwroot"; //TODO: How to handle wwwroot naming?
+    // 使用 XTrace 输出调试日志
 
     protected DHAspNetCoreContentOptions Options { get; }
 
@@ -45,13 +47,13 @@ public class WebContentFileProvider : IWebContentFileProvider
         if (ExtraAllowedFolder(subpath) && ExtraAllowedExtension(subpath))
         {
             var fileInfo = _fileProvider.GetFileInfo(subpath);
-            if (fileInfo.Exists)
-            {
-                return fileInfo;
-            }
+            if (fileInfo.Exists) return fileInfo;
         }
-
-        return _fileProvider.GetFileInfo(_rootPath + subpath);
+        var combined = _rootPath + subpath;
+        var fallback = _fileProvider.GetFileInfo(combined);
+        if (!fallback.Exists && Options.LogFileMisses)
+            XTrace.WriteLine("[WebVFS] MISS file. Request={0} Tried={1}", subpath, combined);
+        return fallback;
     }
 
     /// <summary>
@@ -71,13 +73,13 @@ public class WebContentFileProvider : IWebContentFileProvider
         if (ExtraAllowedFolder(subpath))
         {
             var directory = _fileProvider.GetDirectoryContents(subpath);
-            if (directory.Exists)
-            {
-                return directory;
-            }
+            if (directory.Exists) return directory;
         }
-
-        return _fileProvider.GetDirectoryContents(_rootPath + subpath);
+        var combined = _rootPath + subpath;
+        var fallback = _fileProvider.GetDirectoryContents(combined);
+        if (!fallback.Exists && Options.LogFileMisses)
+            XTrace.WriteLine("[WebVFS] MISS dir. RequestDir={0} Tried={1}", subpath, combined);
+        return fallback;
     }
 
     /// <summary>
@@ -89,16 +91,12 @@ public class WebContentFileProvider : IWebContentFileProvider
     {
         if (!ExtraAllowedFolder(filter))
         {
-            return _fileProvider.Watch(_rootPath + filter);
+            var token = _fileProvider.Watch(_rootPath + filter);
+            return token;
         }
-
-        return new CompositeChangeToken(
-            new[]
-            {
-                    _fileProvider.Watch(_rootPath + filter),
-                    _fileProvider.Watch(filter)
-            }
-        );
+        var token1 = _fileProvider.Watch(_rootPath + filter);
+        var token2 = _fileProvider.Watch(filter);
+        return new CompositeChangeToken([token1, token2]);
     }
 
     protected virtual IFileProvider CreateFileProvider()
