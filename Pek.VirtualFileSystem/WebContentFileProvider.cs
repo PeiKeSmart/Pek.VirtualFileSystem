@@ -47,11 +47,19 @@ public class WebContentFileProvider : IWebContentFileProvider
         if (ExtraAllowedFolder(subpath) && ExtraAllowedExtension(subpath))
         {
             var fileInfo = _fileProvider.GetFileInfo(subpath);
-            if (fileInfo.Exists) return fileInfo;
+            if (fileInfo.Exists)
+            {
+                if (Options.LogFileHits) XTrace.WriteLine("[WebVFS] HIT file(extra). Request={0} Path={1} Size={2}", subpath, subpath, fileInfo.Length);
+                return fileInfo;
+            }
         }
         var combined = _rootPath + subpath;
         var fallback = _fileProvider.GetFileInfo(combined);
-        if (!fallback.Exists && Options.LogFileMisses)
+        if (fallback.Exists)
+        {
+            if (Options.LogFileHits) XTrace.WriteLine("[WebVFS] HIT file(fallback). Request={0} Mapped={1} Size={2}", subpath, combined, fallback.Length);
+        }
+        else if (Options.LogFileMisses)
             XTrace.WriteLine("[WebVFS] MISS file. Request={0} Tried={1}", subpath, combined);
         return fallback;
     }
@@ -73,11 +81,19 @@ public class WebContentFileProvider : IWebContentFileProvider
         if (ExtraAllowedFolder(subpath))
         {
             var directory = _fileProvider.GetDirectoryContents(subpath);
-            if (directory.Exists) return directory;
+            if (directory.Exists)
+            {
+                if (Options.LogFileHits) XTrace.WriteLine("[WebVFS] HIT dir(extra). RequestDir={0}", subpath);
+                return directory;
+            }
         }
         var combined = _rootPath + subpath;
         var fallback = _fileProvider.GetDirectoryContents(combined);
-        if (!fallback.Exists && Options.LogFileMisses)
+        if (fallback.Exists)
+        {
+            if (Options.LogFileHits) XTrace.WriteLine("[WebVFS] HIT dir(fallback). RequestDir={0} MappedDir={1}", subpath, combined);
+        }
+        else if (Options.LogFileMisses)
             XTrace.WriteLine("[WebVFS] MISS dir. RequestDir={0} Tried={1}", subpath, combined);
         return fallback;
     }
