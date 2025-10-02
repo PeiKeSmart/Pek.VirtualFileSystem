@@ -206,18 +206,9 @@ public class WebContentFileProvider : IWebContentFileProvider
     private static bool _dumpedAllVirtualFiles; // 仅一次
     private void TryDumpAllVirtualFilesOnce()
     {
-        if (!Options.DumpAllVirtualFilesOnFirstMiss)
-        {
-            XTrace.WriteLine("[WebVFS][Dump] 跳过：DumpAllVirtualFilesOnFirstMiss=false");
-            return;
-        }
-        if (_dumpedAllVirtualFiles)
-        {
-            XTrace.WriteLine("[WebVFS][Dump] 跳过：已执行过初次转储");
-            return;
-        }
+        if (_dumpedAllVirtualFiles) return;
+        if (!Options.DumpAllVirtualFilesOnFirstMiss) return;
         _dumpedAllVirtualFiles = true;
-        XTrace.WriteLine("[WebVFS][Dump] 开始转储虚拟文件键，DumpAllVirtualFilesOnFirstMiss=true");
         try
         {
             // 通过反射深入 _virtualFileProvider -> VirtualFileProvider.InternalVirtualFileProvider -> _files Lazy 字典
@@ -238,18 +229,6 @@ public class WebContentFileProvider : IWebContentFileProvider
             }
 
             var total = 0;
-            if (candidates.Count == 0)
-            {
-                XTrace.WriteLine("[WebVFS][Dump] 未获取到内部 provider 列表，类型={0}", vpType.FullName);
-            }
-            else
-            {
-                var idx = 0;
-                foreach (var p in candidates)
-                {
-                    XTrace.WriteLine("[WebVFS][Dump] Provider[{0}] Type={1}", idx++, p.GetType().FullName);
-                }
-            }
             foreach (var provider in candidates)
             {
                 var pType = provider.GetType();
@@ -275,7 +254,7 @@ public class WebContentFileProvider : IWebContentFileProvider
             }
             if (total == 0)
             {
-                XTrace.WriteLine("[WebVFS][Dump] 未发现可转储的虚拟文件键（可能 InternalVirtualFileProvider 未加入或字典为空）");
+                XTrace.WriteLine("[WebVFS][Dump] 未发现任何 InternalVirtualFileProvider 或其文件字典为空");
             }
         }
         catch (Exception ex)
