@@ -60,7 +60,10 @@ public class WebContentFileProvider : IWebContentFileProvider
             if (Options.LogFileHits) XTrace.WriteLine("[WebVFS] HIT file(fallback). Request={0} Mapped={1} Size={2}", subpath, combined, fallback.Length);
         }
         else if (Options.LogFileMisses)
+        {
             XTrace.WriteLine("[WebVFS] MISS file. Request={0} Tried={1}", subpath, combined);
+            TryHeuristicFileDiagnostics(subpath);
+        }
         return fallback;
     }
 
@@ -94,7 +97,9 @@ public class WebContentFileProvider : IWebContentFileProvider
             if (Options.LogFileHits) XTrace.WriteLine("[WebVFS] HIT dir(fallback). RequestDir={0} MappedDir={1}", subpath, combined);
         }
         else if (Options.LogFileMisses)
+        {
             XTrace.WriteLine("[WebVFS] MISS dir. RequestDir={0} Tried={1}", subpath, combined);
+        }
         return fallback;
     }
 
@@ -131,5 +136,69 @@ public class WebContentFileProvider : IWebContentFileProvider
     protected virtual bool ExtraAllowedExtension(string path)
     {
         return Options.AllowedExtraWebContentFileExtensions.Any(e => path.EndsWith(e, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void TryHeuristicFileDiagnostics(string requestPath)
+    {
+        try
+        {
+            // 仅针对文件 miss 做一些常见历史转换尝试，帮助定位真实存储的虚拟键。
+            var candidates = new List<string>();
+
+            // 1. 旧拆分逻辑：additional-methods.min.js -> additional_methods/min.js
+            if (requestPath.Contains('.'))
+            {
+                var lastSlash = requestPath.LastIndexOf('/');
+                var dir = lastSlash >= 0 ? requestPath[..lastSlash] : string.Empty;
+                var file = lastSlash >= 0 ? requestPath[(lastSlash + 1)..] : requestPath;
+                // 拆分多点
+                var parts = file.Split('.');
+                if (parts.Length > 2)
+                {
+                    // 旧逻辑会把除最后一段（扩展名前一段）外中间段转成目录并替换 '-' 为 '_'
+                    // original: additional-methods.min.js -> additional_methods/min.js
+                    var ext = parts[^1];
+                    var middle = parts[^2];
+                    var left = string.Join('.', parts.Take(parts.Length - 2));
+                    if (!string.IsNullOrEmpty(left))
+                    {
+                        var legacyDirName = left.Replace('-', '_');
+                        var legacyPath = $"{dir}/{legacyDirName}/{middle}.{ext}";
+                        candidates.Add($"/wwwroot{legacyPath}");
+                        candidates.Add(legacyPath);
+                    }
+                }
+            }
+
+            // 2. 原始嵌入命名空间形式：Pek.DsMallUI.wwwroot.static.plugins.additional-methods.min.js
+            //   请求里去掉 / 前缀与 wwwroot 前缀后尝试还原可能的嵌入全名。
+            var trimmed = requestPath.TrimStart('/');
+            if (trimmed.StartsWith("static/", StringComparison.OrdinalIgnoreCase))
+            {
+                candidates.Add($"Pek.DsMallUI.wwwroot.{trimmed.Replace('/', '.')}" );
+            }
+
+            // 3. 加 /wwwroot/ 前缀（已尝试过 combined），也尝试不含 wwwroot 的直接形式
+            candidates.Add(requestPath);
+
+            var reported = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var c in candidates.Where(c => !string.IsNullOrWhiteSpace(c)))
+            {
+                if (!reported.Add(c)) continue;
+                var fi = _fileProvider.GetFileInfo(c);
+                if (fi.Exists)
+                {
+                    XTrace.WriteLine("[WebVFS][Diag] Candidate MATCH path={0} Size={1}", c, fi.Length);
+                }
+                else
+                {
+                    XTrace.WriteLine("[WebVFS][Diag] Candidate miss path={0}", c);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            XTrace.WriteLine("[WebVFS][Diag] Heuristic diagnostics error: {0}", ex.Message);
+        }
     }
 }
