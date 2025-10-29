@@ -46,8 +46,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Pek.AspNetCore" Version="4.14.2025.1025-beta1136" />
-    <PackageReference Include="Pek.Common" Version="4.15.2025.1025-beta1041" />
+    <PackageReference Include="Pek.AspNetCore" Version="4.14.2025.1029-beta1411" />
+    <PackageReference Include="Pek.Common" Version="4.15.2025.1029-beta1406" />
   </ItemGroup>
 
   <ItemGroup>
